@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ ad.title }}{% endblock %}
+
+{% block content %}
+  <div class="card mb-3">
+    {% if ad.image_url %}
+      <img src="{{ ad.image_url }}" class="card-img-top" style="max-width: 400px;">
+    {% endif %}
+    <div class="card-body">
+      <h3 class="card-title">{{ ad.title }}</h3>
+      <p>{{ ad.description }}</p>
+      <p><b>Категория:</b> {{ ad.category }}</p>
+      <p><b>Состояние:</b> {{ ad.get_condition_display }}</p>
+      <p><b>Автор:</b> {{ ad.user.username }}</p>
+      <p><b>Опубликовано:</b> {{ ad.created_at|date:"d.m.Y H:i" }}</p>
+      {% if user == ad.user %}
+        <a href="{% url 'ad_update' ad.pk %}" class="btn btn-secondary">Редактировать</a>
+        <a href="{% url 'ad_delete' ad.pk %}" class="btn btn-danger">Удалить</a>
+      {% else %}
+        <a href="{% url 'exchangeproposal_create' ad.pk %}" class="btn btn-primary">Предложить обмен</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <h4>Предложения обмена с этим объявлением</h4>
+  <ul class="list-group">
+    {% for proposal in proposals %}
+      <li class="list-group-item">
+        {% if proposal.status == 'pending' %}
+          <b>От кого:</b> {{ proposal.ad_sender.user.username }}<br>
+          <b>Комментарий:</b> {{ proposal.comment }}<br>
+          <b>Статус:</b> {{ proposal.get_status_display }}<br>
+          <b>Создано:</b> {{ proposal.created_at|date:"d.m.Y H:i" }}<br>
+          {% if user == ad.user %}
+            <form method="post" action="{% url 'exchangeproposal_accept' proposal.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success btn-sm">Принять обмен</button>
+            </form>
+            <form method="post" action="{% url 'exchangeproposal_decline' proposal.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">Отклонить</button>
+            </form>
+          {% endif %}
+        {% elif proposal.status == 'accepted' %}
+          <span class="text-success">
+          {{ proposal.created_at|date:"d.m.Y H:i" }} — Обмен совершен с пользователем: {{ proposal.ad_sender.user.username }}<br>
+          Его объявление: {{ proposal.ad_sender.title }}
+        </span>
+        {% elif proposal.status == 'declined' %}
+          <span class="text-danger">Предложение отклонено.</span>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li class="list-group-item">Пока нет предложений обмена.</li>
+    {% endfor %}
+  </ul>
+
+
+{% endblock %}

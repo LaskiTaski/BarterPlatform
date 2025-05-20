@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Объявления{% endblock %}
+
+{% block content %}
+  <h2>Все объявления</h2>
+  <a href="{% url 'ad_create' %}" class="btn btn-primary mb-3">+ Добавить объявление</a>
+  <div class="row">
+    {% for ad in ads %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100">
+          {% if ad.image_url %}
+            <img src="{{ ad.image_url }}" class="card-img-top" alt="{{ ad.title }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ ad.title }}</h5>
+            <p class="card-text">{{ ad.description|truncatewords:15 }}</p>
+            <p class="mb-1"><b>Категория:</b> {{ ad.category }}</p>
+            <p class="mb-1"><b>Состояние:</b> {{ ad.get_condition_display }}</p>
+            <a href="{% url 'ad_detail' ad.pk %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>Объявлений пока нет.</p>
+    {% endfor %}
+  </div>
+{% endblock %}

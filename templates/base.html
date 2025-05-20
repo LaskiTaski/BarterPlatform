@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Обменный пункт{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'ad_list' %}">The Barter Platform</a>
+    <div>
+      {% if user.is_authenticated %}
+        <a href="{% url 'my_exchange_proposals' %}" class="btn btn-outline-info ms-2">Мои предложения</a>
+        <span class="navbar-text">Здравствуйте, {{ user.username }}!</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-light ms-2">Выйти</button>
+        </form>
+
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-outline-light">Войти</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+<div class="container">
+  {% block content %}
+  {% endblock %}
+</div>
+</body>
+</html>

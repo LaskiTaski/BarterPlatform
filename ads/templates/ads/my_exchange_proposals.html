@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Входящие предложения обмена{% endblock %}
+
+{% block content %}
+  <h2>Вам предложили обмен:</h2>
+  <ul class="list-group">
+    {% for proposal in proposals %}
+      <li class="list-group-item mb-2">
+        <b>От пользователя:</b> {{ proposal.ad_sender.user.username }}<br>
+        <b>Его объявление:</b> <a
+              href="{% url 'ad_detail' proposal.ad_sender.pk %}">{{ proposal.ad_sender.title }}</a><br>
+        <b>На ваше объявление:</b> <a
+              href="{% url 'ad_detail' proposal.ad_receiver.pk %}">{{ proposal.ad_receiver.title }}</a><br>
+        <b>Комментарий:</b> {{ proposal.comment }}<br>
+        <b>Статус:</b> {{ proposal.get_status_display }}
+
+        {% if proposal.status == 'declined' %}
+          <span class="text-danger">Вам отказали</span>
+        {% elif proposal.status == 'accepted' %}
+          <span class="text-success">Обмен совершен!</span>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li class="list-group-item">Пока никто не предлагал вам обмен.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
