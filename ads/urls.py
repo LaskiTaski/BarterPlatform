@@ -1,20 +1,41 @@
 from django.urls import path
-from . import views
-from .views import signup
+
+from .views.auth import SignupView
+
+from .views.ad import (AdCreateView, AdUpdateView, AdDeleteView)
+from .views.ad import (AdListView, AdDetailView)
+
+from .views.exchange import (ExchangeProposalCreateView, MyExchangeProposalsView)
+from .views.exchange import (ExchangeProposalAcceptView, ExchangeProposalDeclineView)
+
+app_name = "ads"
 
 urlpatterns = [
-    path('', views.ad_list, name='ad_list'),
-    path('ad/<int:pk>/', views.ad_detail, name='ad_detail'),
-    path('ad/create/', views.ad_create, name='ad_create'),
-    path('ad/<int:pk>/edit/', views.ad_update, name='ad_update'),
-    path('ad/<int:pk>/delete/', views.ad_delete, name='ad_delete'),
-    path('ad/<int:ad_receiver_pk>/exchange/', views.exchangeproposal_create, name='exchangeproposal_create'),
+    # Регистрация
+    path('accounts/signup/', SignupView.as_view(), name='signup'),
 
-    path("accounts/signup/", signup, name="signup"),
+    # "Личный кабинет" — входящие предложения обмена
+    path('accounts/messages/', MyExchangeProposalsView.as_view(), name='my_exchange_proposals'),
 
-    path('accounts/messages/', views.my_exchange_proposals, name='my_exchange_proposals'),
+    # Список всех объявлений (главная)
+    path('', AdListView.as_view(), name='ad_list'),
+    # Просмотр одного объявления
+    path('ad/<int:pk>/', AdDetailView.as_view(), name='ad_detail'),
 
-    path('exchange/<int:pk>/accept/', views.exchangeproposal_accept, name='exchangeproposal_accept'),
-    path('exchange/<int:pk>/decline/', views.exchangeproposal_decline, name='exchangeproposal_decline'),
+    # Создать объявление
+    path('ad/create/', AdCreateView.as_view(), name='ad_create'),
+    # Редактировать объявление
+    path('ad/<int:pk>/edit/', AdUpdateView.as_view(), name='ad_update'),
+    # Удалить объявление
+    path('ad/<int:pk>/delete/', AdDeleteView.as_view(), name='ad_delete'),
 
+    # Создать предложение обмена (по чужому объявлению)
+    path('ad/<int:ad_receiver_pk>/exchange/',
+         ExchangeProposalCreateView.as_view(), name='exchangeproposal_create'),
+    # Принять предложение обмена (POST)
+    path('exchange/<int:pk>/accept/',
+         ExchangeProposalAcceptView.as_view(), name='exchangeproposal_accept'),
+    # Отклонить предложение обмена (POST)
+    path('exchange/<int:pk>/decline/',
+         ExchangeProposalDeclineView.as_view(), name='exchangeproposal_decline'),
 ]

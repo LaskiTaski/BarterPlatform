@@ -1,28 +1,70 @@
 {% extends 'base.html' %}
 
-{% block title %}Объявления{% endblock %}
-
 {% block content %}
-  <h2>Все объявления</h2>
-  <a href="{% url 'ad_create' %}" class="btn btn-primary mb-3">+ Добавить объявление</a>
-  <div class="row">
+<h1>Все объявления</h1>
+<a href="{% url 'ads:ad_create' %}" class="btn btn-primary mb-3">+ Добавить объявление</a>
+
+<!-- Форма поиска и фильтрации -->
+<form method="get" class="d-flex flex-wrap gap-2 align-items-center mb-3">
+    <input type="text" name="q" placeholder="Поиск..." value="{{ request.GET.q }}" class="form-control" style="max-width:180px;">
+    <select name="category" class="form-select" style="max-width:150px;">
+        <option value="">Категория</option>
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if request.GET.category == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+    </select>
+    <select name="condition" class="form-select" style="max-width:120px;">
+        <option value="">Состояние</option>
+        <option value="new" {% if request.GET.condition == 'new' %}selected{% endif %}>Новый</option>
+        <option value="used" {% if request.GET.condition == 'used' %}selected{% endif %}>Б/у</option>
+    </select>
+    <button type="submit" class="btn btn-outline-primary">Найти</button>
+</form>
+
+<!-- Карточки объявлений -->
+<div class="row">
     {% for ad in ads %}
-      <div class="col-md-4 mb-4">
-        <div class="card h-100">
-          {% if ad.image_url %}
-            <img src="{{ ad.image_url }}" class="card-img-top" alt="{{ ad.title }}">
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title">{{ ad.title }}</h5>
-            <p class="card-text">{{ ad.description|truncatewords:15 }}</p>
-            <p class="mb-1"><b>Категория:</b> {{ ad.category }}</p>
-            <p class="mb-1"><b>Состояние:</b> {{ ad.get_condition_display }}</p>
-            <a href="{% url 'ad_detail' ad.pk %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
-          </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100" style="min-width:350px;max-width:400px;min-height:460px;max-height:460px;">
+                {% if ad.image_url %}
+                    <img src="{{ ad.image_url }}" class="card-img-top object-fit-contain" alt="{{ ad.title }}" style="height:220px; width:100%; object-fit:contain;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ ad.title }}</h5>
+                    <p class="card-text">{{ ad.description|truncatechars:120 }}</p>
+                    <p><strong>Категория:</strong> {{ ad.category }}</p>
+                    <p><strong>Состояние:</strong> {{ ad.get_condition_display }}</p>
+                    <a href="{% url 'ads:ad_detail' ad.pk %}" class="btn btn-outline-primary">Подробнее</a>
+                </div>
+            </div>
         </div>
-      </div>
     {% empty %}
-      <p>Объявлений пока нет.</p>
+        <div class="col-12">
+            <p class="text-muted">Объявлений нет.</p>
+        </div>
     {% endfor %}
-  </div>
+</div>
+
+<!-- Пагинация -->
+{% if is_paginated %}
+<nav>
+  <ul class="pagination mt-4">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.condition %}condition={{ request.GET.condition }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>
+      </li>
+    {% endif %}
+    {% for i in paginator.page_range %}
+      <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.condition %}condition={{ request.GET.condition }}&{% endif %}page={{ i }}">{{ i }}</a>
+      </li>
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.condition %}condition={{ request.GET.condition }}&{% endif %}page={{ page_obj.next_page_number }}">Вперёд</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
 {% endblock %}
